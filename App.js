@@ -1,79 +1,107 @@
-/*
-Imports coming from react and react-native
-*/
-
-import React, { Component } from 'react';
-import { Text, View, StyleSheet } from 'react-native';
-
-/*
-Properties (props for short) are properties of an element and they can have different values.
-As in HTML we have an element <img> which must have a property src, which should have
-a hyper reference as its value to an image: src='http://someplace.sp/someimage.png'
-In React Native there is no such element as img and property src - these would be selfmade expressions.
-See: https://facebook.github.io/react-native/docs/props
-
-Event handling properties as onPress are also properties of the elements, not only the
-properties which have some static (or not) value.
-*/
+import React, {Component} from 'react';
+import {Alert, Text, View} from 'react-native';
 
 
 /*
-Component, which is NOT the starting point: this is not exported as default in this App.js
-This can be included in other components - see below.
-Note: Component's name is SayHello and component is used (included) by referring to its name
+state is like components attributes - they can be used inside the component, but not outside.
+Notice that setting prevalues to state attributes, you do as in the constructor.
+When changin the value of the state, you use setState method.
+Every time you change the value, screen is rendered - meaning, new values are set visible.
+
+And again... take a good look at what is shown on the screen - nothing else but what is returned
 */
-class SayHello extends Component {
-  //Render: contents must be rendered, repared
-  render() {
+export default class App extends Component {
+  state = {
+    myState: String,
+    yourState: String,
+    myStateChanged: Boolean,
+    yourStateChanged: Boolean,
+  };
+
+  //Constructor is not needed. Values can be set above where only types are set.
+  constructor () {
+    super (); //super must be called first
+    this.state = {
+      myState: 'I am at school',
+      yourState: 'You are on a holiday',
+      herState: 'She is abroad',
+      myStateChanged: false,
+      yourStateChanged: false,
+      herStateChanged: false,
+    };
+    //function needs to be bound if written in 'normal' way AND using state 
+    // - actually because we are using "this" -object. this object is used in the method meaning this App object.
+    //this.updateYourState = this.updateYourState.bind (this);
+    //Arrow-type function is newer way and does not need a bind - object 'this' is already bound.
+    // this.updateMyState = this.updateMyState.bind (this);
+  }
+
+
+  /*
+Function written in arrow format - there is no need to bind. 
+Compare to method updateYourState
+*/
+  updateMyState = () => {
+    const {myStateChanged} = this.state;
+    if (myStateChanged) {
+      this.setState ({
+        myState: 'I am at school',
+        myStateChanged: false,
+      });
+    } else {
+      this.setState ({
+        myState: 'I am at home',
+        myStateChanged: true,
+      });
+    }
+  };
+  updateYourState = () => {
+    if (this.state.yourStateChanged) {
+      this.setState ({
+        //refers to class's state
+        yourState: 'You are on a holiday',
+        yourStateChanged: false,
+      });
+    } else {
+      this.setState ({
+        //refers to class's state
+        yourState: 'You are at work',
+        yourStateChanged: true,
+      });
+    }
+  };
+  updateHerState = () => {
+    if (this.state.herStateChanged) {
+      this.setState ({
+        //refers to class's state
+        herState: 'She is abroad',
+        herStateChanged: false,
+      });
+    } else {
+      this.setState ({
+        //refers to class's state
+        herState: 'She is shopping',
+        herStateChanged: true,
+      });
+    }
+  };
+  /*
+This is what we see - the render part
+In Text elements there are method calls which happen when the element is clicked
+*/
+
+  render () {
     return (
-        // Returned value must always be just one parent element - here it is View -
-        // and it can include none or more child elements
-        // Returned value is the actual content to be shown on the screen
-        // Here style is added as an inline style - see double curly braces
-        <View style={{ alignItems: 'center' }}>
-          {/* Here style is added from styles definition - only single curly braces */}
-          <Text style={MyStyles.listitem}>Hello {this.props.name}! ({this.props.manufacturer}) ({this.props.price})</Text>
+        <View>
+          <Text onPress={this.updateMyState}> {this.state.myState} </Text>
+          <Text onPress={this.updateYourState}> {this.state.yourState} </Text>
+          <Text onPress={this.updateHerState}> {this.state.herState} </Text>
         </View>
     );
+    /*
+    If we did not use bind, the last function call could be written
+    <Text onPress={()=>this.updateYourState()}> {this.state.yourState} </Text>
+    And this also makes the bind - gives the this-object to the method
+    */
   }
 }
-
-/*
-This component is the starting point - default exported component in file App.js
-*/
-class LotsOfGreetings extends Component {
-  render() {
-    return (
-        <View style={{ alignItems: 'center', top: 50 }}>
-          <Text style={MyStyles.header}>'Some tools' of Bocceli_</Text>
-          {/* Here we add component SayHello several times */}
-          {/* All of these four lines insert component SayHello (see above), */}
-          {/* which includes one View element containing one Text element. */}
-          {/* Here name and status are properties of element SayHello */}
-          {/* and values are printed with statement {this.props.name} and {this.props.status} */}
-          {/* Properties are a bit like method's parameters, where method is component SayHello */}
-          {/* and method call is the included element*/}
-          <SayHello name='Wrench' price={"100€"} manufacturer={"Fiskars"} />
-          <SayHello name='Screwdriver' price={"50€"} manufacturer={"Bla"} />
-          <SayHello name='Mouse' price={"13€"} manufacturer={"Microsoft"} />
-          <SayHello name='Keyboard' price={"150€"} manufacturer={"Logitech"} />
-        </View>
-    );
-  }
-  /*You can think that SayHello elements above are the View elements of component SayHello
-      <View style={{alignItems: 'center'}}>
-        <Text>Hello Juhani!</Text>
-      </View>
-      And the other guys the same way
-  */
-}
-
-//Styles are created like this
-const MyStyles=StyleSheet.create({
-  header:{fontSize:20, fontWeight:"bold", color:"#abc"},
-  listitem:{
-    color:"black"
-  }
-});
-
-export default LotsOfGreetings;
