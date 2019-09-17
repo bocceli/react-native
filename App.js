@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, Component} from 'react';
 import {
     StyleSheet,
     Text,
@@ -8,6 +8,9 @@ import {
     ScrollView,
     FlatList,
 } from 'react-native';
+
+import styles from './mystyles/styles';
+import GamiItem from './components/GamiItem';
 
 /*
 This example does not use Components - this is a function type application
@@ -20,75 +23,45 @@ without binding
 var lkm=0;
 
 export default function App () {
-    const [enteredFirstname, setEnteredFirstname] = useState ('');
-    const [enteredLastname, setEnteredLastname] = useState ('');
+    const [enteredGame, setEnteredGame] = useState (''); //This is a normal state
+    const [huntedGames, setHuntedGames] = useState ([]); //This an array of states, where we can add elements
 
-    const [fullname, setFullname] = useState([]);
+    function gameInputHandler (enteredText) {
+        setEnteredGame (enteredText);
+    }
 
-    const firstnameInputHandler = (firstname) => {
-        setEnteredFirstname(firstname)
-    };
-
-    const lastnameInputHandler = (lastname) => {
-        setEnteredLastname(lastname)
-    };
-
-    const addNameHandler = () => {
+    const addGameHandler = () => {
         lkm++;
-        setFullname(currentFullnames => [...currentFullnames,
-            {keyValue: lkm.toString(), theFirstname: enteredFirstname, theLastname: enteredLastname}
-            ]);
+        // keyValue: if just key, we do not need keyExtractor - see FlatList below
+        setHuntedGames (currentGames => [
+            ...currentGames,
+            {keyValue: lkm.toString(), theValue: enteredGame},
+            // {keyValue: (Math.floor(100*Math.random()+1)).toString(), theValue: enteredGame}, //Not good - random can happen twice or mere times
+        ]);
         // Adding in the end would be setHuntedGames (currentGames => [ ...currentGames, enteredGame]);
     };
     return (
         <View style={styles.screen}>
-            <Text>Add names into FlatList</Text>
+            <Text>Add games into FlatList</Text>
             <View style={styles.inputContainer}>
                 {/* Next line: do not put gameInputHandler() - that would run the function on load */}
                 <TextInput
-                    placeholder="First name"
+                    placeholder="Some text"
                     style={styles.input}
-                    onChangeText={firstnameInputHandler}
-                    value={enteredFirstname}
-                />
-                <TextInput
-                    placeholder="Last name"
-                    style={styles.input}
-                    onChangeText={lastnameInputHandler}
-                    value={enteredLastname}
+                    onChangeText={gameInputHandler}
+                    value={enteredGame}
                 />
                 {/* Next line: do not put braces (not: addGameHandler()) - see previous comment*/}
-                <Button title="ADD Name" onPress={addNameHandler} />
+                <Button title="ADD Game" onPress={addGameHandler} />
             </View>
             {/* Only the visible area is rendered when using Flatlist - so more efficient in some cases */}
             {/* FlatList also needs a key - here we need the KeyEtarctor, because we are not usin 'key' as a key, but 'keyValue' */}
             <FlatList
                 keyExtractor={(aitem) => aitem.keyValue}
-                data={fullname}
-                renderItem={itemsData => (
-                    <View style={styles.listItem}>
-                        <Text>Items {itemsData.item.keyValue}).. {itemsData.item.theFirstname} {itemsData.item.theLastname}</Text>
-                    </View>
-                )}
+                data={huntedGames}
+                renderItem={itemiData => <GamiItem myKey={itemiData.item.keyValue} myValue={itemiData.item.theValue} />}
             />
         </View>
     );
 }
 
-
-const styles = StyleSheet.create ({
-    screen: {padding: 50},
-    inputContainer: {
-        flexDirection: 'column',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-    },
-    input: {width: '80%', borderColor: 'green', borderWidth: 2, padding: 10},
-    listItem: {
-        padding: 10,
-        marginVertical: 10,
-        borderWidth: 2,
-        borderColor: '#0f0',
-        backgroundColor: '#fce',
-    },
-});
