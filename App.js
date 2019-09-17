@@ -1,73 +1,94 @@
-import React, {Component} from 'react';
-import {Alert, Text, View, TextInput, Button} from 'react-native';
-import set from "@babel/runtime/helpers/esm/set";
-
+import React, {useState} from 'react';
+import {
+    StyleSheet,
+    Text,
+    View,
+    TextInput,
+    Button,
+    ScrollView,
+    FlatList,
+} from 'react-native';
 
 /*
-state is like components attributes - they can be used inside the component, but not outside.
-Notice that setting prevalues to state attributes, you do as in the constructor.
-When changin the value of the state, you use setState method.
-Every time you change the value, screen is rendered - meaning, new values are set visible.
-
-And again... take a good look at what is shown on the screen - nothing else but what is returned
+This example does not use Components - this is a function type application
+At least one good thing that now we have our 'states' available
+without binding
 */
-export default class App extends Component {
-    state = {
-        enteredNumberOne: Number,
-        enteredNumberTwo: Number,
-        result: Number | undefined,
+
+
+/* This variable is to be the index of added games*/
+var lkm=0;
+
+export default function App () {
+    const [enteredFirstname, setEnteredFirstname] = useState ('');
+    const [enteredLastname, setEnteredLastname] = useState ('');
+
+    const [fullname, setFullname] = useState([]);
+
+    const firstnameInputHandler = (firstname) => {
+        setEnteredFirstname(firstname)
     };
 
-    //Constructor is not needed. Values can be set above where only types are set.
-    constructor() {
-        super(); //super must be called first
-        this.state = {};
-    }
-
-    calculate = (operation) => {
-        let result = 0;
-        switch (operation) {
-            case '+':
-                result = this.state.enteredNumberOne + this.state.enteredNumberTwo;
-                break;
-            case '-':
-                result = this.state.enteredNumberOne - this.state.enteredNumberTwo;
-                break;
-            case '*':
-                result = this.state.enteredNumberOne * this.state.enteredNumberTwo;
-                break;
-            case '/':
-                result = this.state.enteredNumberOne / this.state.enteredNumberTwo;
-                break;
-        }
-        console.log(this.state.enteredNumberOne);
-        console.log(this.state.enteredNumberOne + ' ' + operation + ' ' + this.state.enteredNumberTwo + ' = ' + result);
-        this.setState({
-            result: result,
-        })
+    const lastnameInputHandler = (lastname) => {
+        setEnteredLastname(lastname)
     };
 
-    render() {
-        return (
-            <View>
-                <TextInput placeholder={"First number"} keyboardType={"numeric"}
-                           onChangeText={(text) => this.setState({enteredNumberOne: Number(text)})}/>
-                <TextInput placeholder={"Second number"} keyboardType={"numeric"}
-                           onChangeText={(text) => this.setState({enteredNumberTwo: Number(text)})}/>
-
-                <Button title="+" onPress={() => this.calculate('+')}/>
-                <Button title="-" onPress={() => this.calculate('-')}/>
-                <Button title="*" onPress={() => this.calculate('*')}/>
-                <Button title="/" onPress={() => this.calculate('/')}/>
-
-                <TextInput placeholder={"Result"} readonly={true}
-                           value={this.state.result && this.state.result + ''}/>
+    const addNameHandler = () => {
+        lkm++;
+        setFullname(currentFullnames => [...currentFullnames,
+            {keyValue: lkm.toString(), theFirstname: enteredFirstname, theLastname: enteredLastname}
+            ]);
+        // Adding in the end would be setHuntedGames (currentGames => [ ...currentGames, enteredGame]);
+    };
+    return (
+        <View style={styles.screen}>
+            <Text>Add names into FlatList</Text>
+            <View style={styles.inputContainer}>
+                {/* Next line: do not put gameInputHandler() - that would run the function on load */}
+                <TextInput
+                    placeholder="First name"
+                    style={styles.input}
+                    onChangeText={firstnameInputHandler}
+                    value={enteredFirstname}
+                />
+                <TextInput
+                    placeholder="Last name"
+                    style={styles.input}
+                    onChangeText={lastnameInputHandler}
+                    value={enteredLastname}
+                />
+                {/* Next line: do not put braces (not: addGameHandler()) - see previous comment*/}
+                <Button title="ADD Name" onPress={addNameHandler} />
             </View>
-        );
-        /*
-        If we did not use bind, the last function call could be written
-        <Text onPress={()=>this.updateYourState()}> {this.state.yourState} </Text>
-        And this also makes the bind - gives the this-object to the method
-        */
-    }
+            {/* Only the visible area is rendered when using Flatlist - so more efficient in some cases */}
+            {/* FlatList also needs a key - here we need the KeyEtarctor, because we are not usin 'key' as a key, but 'keyValue' */}
+            <FlatList
+                keyExtractor={(aitem) => aitem.keyValue}
+                data={fullname}
+                renderItem={itemsData => (
+                    <View style={styles.listItem}>
+                        <Text>Items {itemsData.item.keyValue}).. {itemsData.item.theFirstname} {itemsData.item.theLastname}</Text>
+                    </View>
+                )}
+            />
+        </View>
+    );
 }
+
+
+const styles = StyleSheet.create ({
+    screen: {padding: 50},
+    inputContainer: {
+        flexDirection: 'column',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+    },
+    input: {width: '80%', borderColor: 'green', borderWidth: 2, padding: 10},
+    listItem: {
+        padding: 10,
+        marginVertical: 10,
+        borderWidth: 2,
+        borderColor: '#0f0',
+        backgroundColor: '#fce',
+    },
+});
