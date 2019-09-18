@@ -1,7 +1,11 @@
 import React, {Component} from 'react';
-import {Alert, Text, View, TextInput, Button} from 'react-native';
-import set from "@babel/runtime/helpers/esm/set";
+import {View} from 'react-native';
 
+import NumberInput from "./components/NumberInput";
+import SignButton from "./components/SignButton";
+import ResultTextInput from "./components/ResultTextInput";
+
+import styles from "./styles/styles";
 
 /*
 state is like components attributes - they can be used inside the component, but not outside.
@@ -40,7 +44,6 @@ export default class App extends Component {
                 result = this.state.enteredNumberOne / this.state.enteredNumberTwo;
                 break;
         }
-        console.log(this.state.enteredNumberOne);
         console.log(this.state.enteredNumberOne + ' ' + operation + ' ' + this.state.enteredNumberTwo + ' = ' + result);
         this.setState({
             result: result,
@@ -49,19 +52,20 @@ export default class App extends Component {
 
     render() {
         return (
-            <View>
-                <TextInput placeholder={"First number"} keyboardType={"numeric"}
-                           onChangeText={(text) => this.setState({enteredNumberOne: Number(text)})}/>
-                <TextInput placeholder={"Second number"} keyboardType={"numeric"}
-                           onChangeText={(text) => this.setState({enteredNumberTwo: Number(text)})}/>
-
-                <Button title="+" onPress={() => this.calculate('+')}/>
-                <Button title="-" onPress={() => this.calculate('-')}/>
-                <Button title="*" onPress={() => this.calculate('*')}/>
-                <Button title="/" onPress={() => this.calculate('/')}/>
-
-                <TextInput placeholder={"Result"} readonly={true}
-                           value={this.state.result && this.state.result + ''}/>
+            <View style={styles.screen}>
+                <View style={styles.inputs}>
+                    <NumberInput placeholder={"First number"}
+                                 onChangeText={(text) => this.setState({enteredNumberOne: Number(text)})} />
+                    <NumberInput placeholder={"Second number"}
+                                 onChangeText={(text) => this.setState({enteredNumberTwo: Number(text)})} />
+                    <ResultTextInput placeholder={"Result"} value={this.state.result && this.state.result + ''} />
+                </View>
+                <View style={styles.buttons}>
+                    <SignButton title="+" onPress={() => this.calculate('+')}/>
+                    <SignButton title="-" onPress={() => this.calculate('-')}/>
+                    <SignButton title="*" onPress={() => this.calculate('*')}/>
+                    <SignButton title="/" onPress={() => this.calculate('/')}/>
+                </View>
             </View>
         );
         /*
