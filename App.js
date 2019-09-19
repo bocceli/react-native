@@ -7,14 +7,13 @@ export default class FetchExample extends React.Component {
         super (props);
         this.state = {
             isLoading: true,
-            index: 1
         };
     }
 
     componentDidMount () {
         // First we fetch from a URL
         return (
-            fetch ('https://facebook.github.io/react-native/movies.json')
+            fetch ('https://election-machine01-dot-mobile-app-01-251306.appspot.com/rest/election-machine/ems/get-candidates')
             // This returns a response, which we convert to json (response.json())
                 .then (response => response.json ())
                 // This json is given to next method where the parameter name is responseJson
@@ -24,7 +23,7 @@ export default class FetchExample extends React.Component {
                         {
                             isLoading: false,
                             // Here we get the element (an array) movies of this JSON String
-                            dataSource: responseJson.movies,
+                            dataSource: responseJson,
 
                             // Here we get the actual JSON String
                             jsonString: JSON.stringify (responseJson),
@@ -41,12 +40,6 @@ export default class FetchExample extends React.Component {
     getMovie = (id) => {
         console.log(this.state.dataSource.filter(movie => movie.id == id));
         return this.state.dataSource.filter(movie => movie.id == id);
-    };
-
-    addOneToIndex = () => {
-        this.setState({
-            index: this.state.index+1,
-        });
     };
 
     render () {
@@ -67,15 +60,14 @@ export default class FetchExample extends React.Component {
 
                 {/* And the movies in a FlatList - scrollable list which is rendered only on the visible area*/}
                 <FlatList
-                    data={this.getMovie(this.state.index)}
+                    data={this.state.dataSource}
                     renderItem={({item}) => (
                         <View style={styles.listItem}>
-                            <Text>{item.id}) {item.title}, {item.releaseYear}</Text>
+                            <Text>{item.candidateId}) {item.firstName} {item.lastName}, {item.politicalParty}</Text>
                         </View>
                     )}
-                    keyExtractor={(item) => item.id}
+                    keyExtractor={(item) => item.candidateId+''}
                 />
-                <Button title={'Next'} onPress={() => this.addOneToIndex()} />
             </View>
         );
     }
