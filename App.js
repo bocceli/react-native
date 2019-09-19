@@ -1,73 +1,99 @@
-import React, {Component} from 'react';
-import {Alert, Text, View, TextInput, Button} from 'react-native';
-import set from "@babel/runtime/helpers/esm/set";
+import React from 'react';
+import {FlatList, ActivityIndicator, Text, View, StyleSheet, Button} from 'react-native';
 
+export default class FetchExample extends React.Component {
 
-/*
-state is like components attributes - they can be used inside the component, but not outside.
-Notice that setting prevalues to state attributes, you do as in the constructor.
-When changin the value of the state, you use setState method.
-Every time you change the value, screen is rendered - meaning, new values are set visible.
-
-And again... take a good look at what is shown on the screen - nothing else but what is returned
-*/
-export default class App extends Component {
-    state = {
-        enteredNumberOne: Number,
-        enteredNumberTwo: Number,
-        result: Number | undefined,
-    };
-
-    //Constructor is not needed. Values can be set above where only types are set.
-    constructor() {
-        super(); //super must be called first
-        this.state = {};
+    constructor (props) {
+        super (props);
+        this.state = {
+            isLoading: true,
+            index: 1
+        };
     }
 
-    calculate = (operation) => {
-        let result = 0;
-        switch (operation) {
-            case '+':
-                result = this.state.enteredNumberOne + this.state.enteredNumberTwo;
-                break;
-            case '-':
-                result = this.state.enteredNumberOne - this.state.enteredNumberTwo;
-                break;
-            case '*':
-                result = this.state.enteredNumberOne * this.state.enteredNumberTwo;
-                break;
-            case '/':
-                result = this.state.enteredNumberOne / this.state.enteredNumberTwo;
-                break;
-        }
-        console.log(this.state.enteredNumberOne);
-        console.log(this.state.enteredNumberOne + ' ' + operation + ' ' + this.state.enteredNumberTwo + ' = ' + result);
-        this.setState({
-            result: result,
-        })
+    componentDidMount () {
+        // First we fetch from a URL
+        return (
+            fetch ('https://facebook.github.io/react-native/movies.json')
+            // This returns a response, which we convert to json (response.json())
+                .then (response => response.json ())
+                // This json is given to next method where the parameter name is responseJson
+                .then (responseJson => {
+                    // In this method we set some state values
+                    this.setState (
+                        {
+                            isLoading: false,
+                            // Here we get the element (an array) movies of this JSON String
+                            dataSource: responseJson.movies,
+
+                            // Here we get the actual JSON String
+                            jsonString: JSON.stringify (responseJson),
+                        },
+                        function () {}
+                    );
+                })
+                .catch (error => {
+                    console.error (error);
+                })
+        );
+    }
+
+    getMovie = (id) => {
+        console.log(this.state.dataSource.filter(movie => movie.id == id));
+        return this.state.dataSource.filter(movie => movie.id == id);
     };
 
-    render() {
+    addOneToIndex = () => {
+        this.setState({
+            index: this.state.index+1,
+        });
+    };
+
+    render () {
+        // If the value of state isLoading is 'false' we return Activityindicator
+        // here returning means that we show ActivityIndicator on the screen
+        if (this.state.isLoading) {
+            return (
+                <View style={{flex: 1, padding: 20}}>
+                    <ActivityIndicator />
+                </View>
+            );
+        }
+        // Else we show the elemnts oj JSON in the screen
+
         return (
-            <View>
-                <TextInput placeholder={"First number"} keyboardType={"numeric"}
-                           onChangeText={(text) => this.setState({enteredNumberOne: Number(text)})}/>
-                <TextInput placeholder={"Second number"} keyboardType={"numeric"}
-                           onChangeText={(text) => this.setState({enteredNumberTwo: Number(text)})}/>
+            <View style={{flex: 1, paddingTop: 20}}>
+                {/* Here we show the actual JSON String to be able to demonstrate the situation */}
 
-                <Button title="+" onPress={() => this.calculate('+')}/>
-                <Button title="-" onPress={() => this.calculate('-')}/>
-                <Button title="*" onPress={() => this.calculate('*')}/>
-                <Button title="/" onPress={() => this.calculate('/')}/>
-
-                <TextInput placeholder={"Result"} readonly={true}
-                           value={this.state.result && this.state.result + ''}/>
+                {/* And the movies in a FlatList - scrollable list which is rendered only on the visible area*/}
+                <FlatList
+                    data={this.getMovie(this.state.index)}
+                    renderItem={({item}) => (
+                        <View style={styles.listItem}>
+                            <Text>{item.id}) {item.title}, {item.releaseYear}</Text>
+                        </View>
+                    )}
+                    keyExtractor={(item) => item.id}
+                />
+                <Button title={'Next'} onPress={() => this.addOneToIndex()} />
             </View>
         );
-        /*
-        If we did not use bind, the last function call could be written
-        <Text onPress={()=>this.updateYourState()}> {this.state.yourState} </Text>
-        And this also makes the bind - gives the this-object to the method
-        */
     }
 }
+
+const styles = StyleSheet.create ({
+    screen: {padding: 50},
+    inputContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+    },
+    input: {width: '80%', borderColor: 'green', borderWidth: 2, padding: 10},
+    listItem: {
+        padding: 10,
+        marginVertical: 10,
+        borderWidth: 2,
+        borderColor: '#0f0',
+        backgroundColor: '#fce',
+    },
+});
